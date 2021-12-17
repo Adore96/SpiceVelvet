@@ -1,7 +1,9 @@
 package com.adore96.SpiceVelvet.controller;
 
-import com.adore96.SpiceVelvet.securityConfig.BcryptFunction;
+import com.adore96.SpiceVelvet.bean.UserDataBean;
+import com.adore96.SpiceVelvet.model.User;
 import com.adore96.SpiceVelvet.repository.UserRepository;
+import com.adore96.SpiceVelvet.securityConfig.BcryptFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +22,11 @@ import java.util.Optional;
  */
 
 @RestController
-@CrossOrigin(value = "http://localhost:4200")
+//@CrossOrigin(value = "http://localhost:4200")
 public class MainController {
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
+
     @Autowired
     UserRepository userRepository;
 
@@ -50,13 +53,13 @@ public class MainController {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @DeleteMapping("/DeleteStudent/{id}")
-    public List<Users> DeleteStudent(@PathVariable String id) {
+    public List<User> DeleteStudent(@PathVariable String id) {
         System.out.println("DeleteStudent Method method in Main Controller.");
 
         int Id = Integer.valueOf(id);
 
-        studentRepo.deleteById(Id);
-        return studentRepo.findAll();
+        userRepository.deleteById(Id);
+        return userRepository.findAll();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,8 +70,8 @@ public class MainController {
 
         int Id = Integer.valueOf(id);
 
-        Users user1 = new Users();
-        user1 = studentRepo.getOne(Id);
+        User user1 = new User();
+        user1 = userRepository.getOne(Id);
 
         model.addAttribute("userdetails", user1);
         return "UserUpdate";
@@ -79,19 +82,19 @@ public class MainController {
     @RequestMapping("/")
     public String main(Model model) {
 
-        List<Users> users = studentRepo.findAll();
-        List<DataBean> dataBeans = new ArrayList<>();
+        List<User> users = userRepository.findAll();
+        List<UserDataBean> dataBeans = new ArrayList<>();
 
         for (int i = 0; i < users.size(); i++) {
-            DataBean dBean = new DataBean();
-            dBean.setId(String.valueOf(users.get(i).getId()).trim());
-            dBean.setFname(users.get(i).getFname().trim());
-            dBean.setLname(users.get(i).getLname().trim());
-            dBean.setUsername(users.get(i).getUsername().trim());
-            dBean.setPassword(users.get(i).getPassword().trim());
-            dBean.setTelephone(String.valueOf(users.get(i).getTelephone()).trim());
+            UserDataBean userDataBean = new UserDataBean();
+            userDataBean.setId(String.valueOf(users.get(i).getId()).trim());
+            userDataBean.setFname(users.get(i).getFname().trim());
+            userDataBean.setLname(users.get(i).getLname().trim());
+            userDataBean.setUsername(users.get(i).getUsername().trim());
+            userDataBean.setPassword(users.get(i).getPassword().trim());
+            userDataBean.setTelephone(String.valueOf(users.get(i).getTelephone()).trim());
 
-            dataBeans.add(dBean);
+            dataBeans.add(userDataBean);
         }
 
         model.addAttribute("dataBean", dataBeans);
@@ -101,11 +104,11 @@ public class MainController {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView signup(@RequestBody DataBean dataBean) {
+    public RedirectView signup(@RequestBody UserDataBean dataBean) {
         System.out.println("Calling signup method in Main Controller.");
         BcryptFunction bcryptFunction = new BcryptFunction();
 
-        Users users2 = new Users();
+        User users2 = new User();
 
         users2.setFname(dataBean.getFname().trim());
         users2.setLname(dataBean.getLname().trim());
@@ -113,7 +116,7 @@ public class MainController {
         users2.setPassword(bcryptFunction.encoder().encode(dataBean.getPassword()).trim());
         users2.setTelephone(Integer.parseInt(dataBean.getTelephone().trim()));
 
-        studentRepo.save(users2);
+        userRepository.save(users2);
 
         return new RedirectView("/");
     }
@@ -121,17 +124,17 @@ public class MainController {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @PostMapping("/EditStudent/updateStudent")
-    public RedirectView updateStudent(DataBean dataBean) {
+    public RedirectView updateStudent(UserDataBean userDataBean) {
 
-        Users users2 = new Users();
+        User users2 = new User();
 
-        users2.setFname(dataBean.getFname().trim());
-        users2.setLname(dataBean.getLname().trim());
-        users2.setUsername(dataBean.getUsername().trim());
-        users2.setPassword(dataBean.getPassword().trim());
-        users2.setTelephone(Integer.parseInt(dataBean.getTelephone().trim()));
+        users2.setFname(userDataBean.getFname().trim());
+        users2.setLname(userDataBean.getLname().trim());
+        users2.setUsername(userDataBean.getUsername().trim());
+        users2.setPassword(userDataBean.getPassword().trim());
+        users2.setTelephone(Integer.parseInt(userDataBean.getTelephone().trim()));
 
-        studentRepo.save(users2);
+        userRepository.save(users2);
 
         return new RedirectView("/");
     }
@@ -139,17 +142,15 @@ public class MainController {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @RequestMapping("/findAllUsers")
-    public List<Users> FindAllUsers() {
-        return studentRepo.findAll();
+    public List<User> FindAllUsers() {
+        return userRepository.findAll();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @RequestMapping("/findById/{id}")
-    public Optional<Users> findById(@PathVariable String id) {
+    public Optional<User> findById(@PathVariable String id) {
         int newid = Integer.parseInt(id);
-        return studentRepo.findById(newid);
+        return userRepository.findById(newid);
     }
-}
-
 }
